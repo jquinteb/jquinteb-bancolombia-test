@@ -1,0 +1,171 @@
+<!-- cuentasForm.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Clientes</title>
+  <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Agrega el enlace al archivo JavaScript de Bootstrap -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>  
+</head>
+<body>
+  <div class="container">   
+
+    <!-- Formulario para crear un nuevo cliente -->
+    <h2>Crear Nuevo Cliente</h2>
+    <form action="/cliente" method="POST">
+      <div class="form-group">
+        <label for="cedula">Cédula:</label>
+        <input type="text" class="form-control" id="cedula" name="cedula" required>
+      </div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+      </div>
+
+      <div class="form-group">
+        <label for="region">Región:</label>
+        <input type="text" class="form-control" id="region" name="region" required>
+      </div>
+
+      <div class="form-group">
+        <label for="edad">Edad:</label>
+        <input type="number" class="form-control" id="edad" name="edad" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Crear Cliente</button>
+    </form>
+
+    <!-- Tabla para mostrar las cuentas existentes -->
+    <h2>Clientes existentes</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Nombre</th>
+          <th>Region</th>
+          <th>Edad</th>          
+        </tr>
+      </thead>
+      <tbody>
+        <% cliente.forEach(function(cliente) { %>
+          <tr>
+            <td><%= cliente.cedula %></td>
+            <td><%= cliente.nombre %></td>
+            <td><%= cliente.region %></td>
+            <td><%= cliente.edad %></td>            
+            <td>
+              <a href="#" class="btn btn-primary btn-sm" onclick="abrirPopup('<%= cliente.cedula %>', '<%= cliente.nombre %>', '<%= cliente.region %>', '<%= cliente.edad %>')">Modificar</a>
+              <a href="/cliente/delete/<%= cliente.cedula %>" class="btn btn-danger btn-sm">Eliminar</a>              
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    
+    <div id="modificarPopup" class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modificar Cliente</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="modificarForm"></form>
+              <div class="form-group">
+                <label for="mod_cedula">Cédula:</label>
+                <input type="text" class="form-control" id="mod_cedula" name="cedula" required readonly>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_nombre">Nombre:</label>
+                <input type="text" class="form-control" id="mod_nombre" name="nombre" required>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_region">Región:</label>
+                <input type="text" class="form-control" id="mod_region" name="region" required>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_edad">Saldo:</label>
+                <input type="number" class="form-control" id="mod_edad" name="edad" required>
+              </div>
+              
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="guardarModificacion()">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Código JavaScript personalizado -->
+  <script>
+    function abrirPopup(cedula, nombre, region, edad) {
+      
+      // Actualizar los campos del formulario de modificación con los datos del registro
+      document.getElementById("mod_cedula").value = cedula;
+      document.getElementById("mod_nombre").value = nombre;
+      document.getElementById("mod_region").value = region;
+      document.getElementById("mod_edad").value = edad;      
+
+      // Mostrar el popup
+      $('#modificarPopup').modal('show');
+    }
+
+    function guardarModificacion() {
+      // Obtener los datos modificados del formulario de modificación
+      var cedula = document.getElementById("mod_cedula").value;
+      var nombre = document.getElementById("mod_nombre").value;
+      var region = document.getElementById("mod_region").value;
+      var edad = document.getElementById("mod_edad").value;
+      
+       // Crear un objeto con los datos modificados
+      var datosModificados = {
+        cedula: cedula,
+        nombre: nombre,
+        region: region,
+        edad: edad
+      };
+
+      // Realizar una solicitud POST al servidor para enviar los datos modificados
+      fetch('/cliente/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosModificados)
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Procesar la respuesta del servidor
+        console.log(data); // Puedes mostrar un mensaje de éxito, actualizar la tabla, etc.
+        // Cerrar el popup
+        $('#modificarPopup').modal('hide');
+
+        location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+   
+  </script>
+
+</body>
+</html>

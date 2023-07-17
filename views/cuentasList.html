@@ -1,0 +1,206 @@
+<!-- cuentasForm.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Cuentas</title>
+  <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Agrega el enlace al archivo JavaScript de Bootstrap -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>  
+
+
+  <!-- Agrega los enlaces a los archivos JavaScript de Bootstrap y Datepicker -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+
+</head>
+<body>
+  <div class="container">    
+    
+    <!-- Formulario para crear una nueva cuenta -->
+    <h2>Crear Nueva Cuenta</h2>
+    <form action="/cuentas" method="POST">
+      <div class="form-group">
+        <label for="num_cuenta">Número de Cuenta:</label>
+        <input type="text" class="form-control" id="num_cuenta" name="num_cuenta" required>
+      </div>
+
+      <div class="form-group">
+        <label for="cedula_cliente">Cédula del Cliente:</label>
+        <input type="text" class="form-control" id="cedula_cliente" name="cedula_cliente" required>
+      </div>
+
+      <div class="form-group">
+        <label for="estado">Estado:</label>
+        <select class="form-control" id="estado" name="estado" required>
+          <option value="0">Inactiva</option>
+          <option value="1">Activa</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="saldo">Saldo:</label>
+        <input type="number" class="form-control" id="saldo" name="saldo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="fecha_apertura">Fecha de Apertura:</label>
+        <input type="text" class="form-control datepicker" id="fecha_apertura" name="fecha_apertura" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+    </form>
+
+    <!-- Tabla para mostrar las cuentas existentes -->
+    <h2>Cuentas existentes</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Número Cuenta</th>
+          <th>Cédula Cliente</th>
+          <th>Estado</th>
+          <th>Saldo</th>
+          <th>Fecha Apertura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% cuentas.forEach(function(cuenta) { %>
+          <tr>
+            <td><%= cuenta.num_cuenta %></td>
+            <td><%= cuenta.cedula_cliente %></td>
+            <td><%= cuenta.estado === 1 ? 'Activa' : 'Inactiva' %></td>
+            <td><%= cuenta.saldo %></td>
+            <td><%= cuenta.fecha_apertura %></td>
+            <td>
+              <a href="#" class="btn btn-primary btn-sm" onclick="abrirPopup('<%= cuenta.num_cuenta %>', '<%= cuenta.cedula_cliente %>', '<%= cuenta.estado %>', '<%= cuenta.saldo %>', '<%= cuenta.fecha_apertura %>')">Modificar</a>
+              <a href="/cuentas/delete/<%= cuenta.num_cuenta %>" class="btn btn-danger btn-sm">Eliminar</a>              
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <div id="modificarPopup" class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modificar Cuenta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="modificarForm"></form>
+            <div class="form-group">
+              <label for="mod_num_cuenta">Número de Cuenta:</label>
+              <input type="text" class="form-control" id="mod_num_cuenta" name="num_cuenta" required readonly>
+            </div>
+
+              <div class="form-group">
+                <label for="mod_cedula_cliente">Cédula del Cliente:</label>
+                <input type="text" class="form-control" id="mod_cedula_cliente" name="cedula_cliente" required readonly>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_estado">Estado:</label>
+                <select class="form-control" id="mod_estado" name="estado" required>
+                  <option value="0">Inactiva</option>
+                  <option value="1">Activa</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_saldo">Saldo:</label>
+                <input type="number" class="form-control" id="mod_saldo" name="saldo" required>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_fecha_apertura">Fecha de Apertura:</label>
+                <input type="text" class="form-control" id="mod_fecha_apertura" name="fecha_apertura" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="guardarModificacion()">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Código JavaScript personalizado -->
+  <script>
+
+  $(document).ready(function() {
+        $('.datepicker').datepicker({
+          format: 'yyyy-mm-dd',
+          autoclose: true,
+          todayHighlight: true
+        });
+      });
+      
+    function abrirPopup(numCuenta, cedulaCliente, estado, saldo, fechaApertura) {      
+      // Actualizar los campos del formulario de modificación con los datos del registro
+      document.getElementById("mod_num_cuenta").value = numCuenta;
+      document.getElementById("mod_cedula_cliente").value = cedulaCliente;
+      document.getElementById("mod_estado").value = estado;
+      document.getElementById("mod_saldo").value = saldo;
+      document.getElementById("mod_fecha_apertura").value = fechaApertura;
+
+      // Mostrar el popup
+      $('#modificarPopup').modal('show');
+    }
+
+    function guardarModificacion() {
+      // Obtener los datos modificados del formulario de modificación
+      var numCuenta = document.getElementById("mod_num_cuenta").value;
+      var cedulaCliente = document.getElementById("mod_cedula_cliente").value;
+      var estado = document.getElementById("mod_estado").value;
+      var saldo = document.getElementById("mod_saldo").value;
+      var fechaApertura = document.getElementById("mod_fecha_apertura").value;
+
+       // Crear un objeto con los datos modificados
+       var datosModificados = {
+        num_cuenta: numCuenta,
+        cedulaCliente: cedulaCliente,        
+        estado: estado,
+        saldo: saldo,
+        fecha_apertura: fechaApertura
+      };
+
+      // Realizar una solicitud POST al servidor para enviar los datos modificados
+      fetch('/cuentas/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosModificados)
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Procesar la respuesta del servidor
+        console.log(data); // Puedes mostrar un mensaje de éxito, actualizar la tabla, etc.
+        // Cerrar el popup
+        $('#modificarPopup').modal('hide');
+
+        location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+   
+  </script>
+</body>
+</html>
+</body>
+</html>

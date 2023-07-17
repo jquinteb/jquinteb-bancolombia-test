@@ -1,0 +1,156 @@
+<!-- cuentasForm.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Clave Dinámica</title>
+  <!-- Agrega los enlaces a los archivos CSS de Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Agrega el enlace al archivo JavaScript de Bootstrap -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>  
+</head>
+<body>
+  <div class="container">   
+
+    <!-- Formulario para crear un nuevo cliente -->
+    <h2>Crear Nueva Clave Dinámica</h2>
+    <form action="/clavedinamica" method="POST">
+      <div class="form-group">
+        <label for="cedula_cliente">Cédula:</label>
+        <input type="text" class="form-control" id="cedula_cliente" name="cedula_cliente" required>
+      </div>
+
+      <div class="form-group">
+        <label for="correo">Correo:</label>
+        <input type="text" class="form-control" id="correo" name="correo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="celular">Celular:</label>
+        <input type="text" class="form-control" id="celular" name="celular" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Crear Clave Dinámica</button>
+    </form>
+
+    <!-- Tabla para mostrar las cuentas existentes -->
+    <h2>Claves Dinámicas existentes</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Correo</th>
+          <th>Celular</th>          
+        </tr>
+      </thead>
+      <tbody>
+        <% clavedinamica.forEach(function(clavedinamica) { %>
+          <tr>
+            <td><%= clavedinamica.cedula_cliente %></td>
+            <td><%= clavedinamica.correo %></td>
+            <td><%= clavedinamica.celular %></td>            
+            <td>
+              <a href="#" class="btn btn-primary btn-sm" onclick="abrirPopup('<%= clavedinamica.cedula_cliente %>', '<%= clavedinamica.correo %>', '<%= clavedinamica.celular %>')">Modificar</a>
+              <a href="/cliente/delete/<%= clavedinamica.cedula_cliente %>" class="btn btn-danger btn-sm">Eliminar</a>              
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    
+    <div id="modificarPopup" class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modificar Clave Dinamica</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="modificarForm"></form>
+              <div class="form-group">
+                <label for="mod_cedula_cliente">Cédula:</label>
+                <input type="text" class="form-control" id="mod_cedula_cliente" name="cedula_cliente" required readonly>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_correo">Correo:</label>
+                <input type="text" class="form-control" id="mod_correo" name="correo" required>
+              </div>
+
+              <div class="form-group">
+                <label for="mod_celular">Celular:</label>
+                <input type="text" class="form-control" id="mod_celular" name="celular" required>
+              </div>
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="guardarModificacion()">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Código JavaScript personalizado -->
+  <script>
+    function abrirPopup(cedula_cliente, correo, celular) {
+      
+      // Actualizar los campos del formulario de modificación con los datos del registro
+      document.getElementById("mod_cedula_cliente").value = cedula_cliente;
+      document.getElementById("mod_correo").value = correo;
+      document.getElementById("mod_celular").value = celular;      
+
+      // Mostrar el popup
+      $('#modificarPopup').modal('show');
+    }
+
+    function guardarModificacion() {
+      // Obtener los datos modificados del formulario de modificación
+      var cedula_cliente = document.getElementById("mod_cedula_cliente").value;
+      var correo = document.getElementById("mod_correo").value;
+      var celular = document.getElementById("mod_celular").value;      
+      
+       // Crear un objeto con los datos modificados
+      var datosModificados = {
+        cedula_cliente: cedula_cliente,
+        correo: correo,
+        celular: celular
+      };
+
+      // Realizar una solicitud POST al servidor para enviar los datos modificados
+      fetch('/clavedinamica/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosModificados)
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Procesar la respuesta del servidor
+        console.log(data); // Puedes mostrar un mensaje de éxito, actualizar la tabla, etc.
+        // Cerrar el popup
+        $('#modificarPopup').modal('hide');
+
+        location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+   
+  </script>
+
+</body>
+</html>
