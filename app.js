@@ -43,11 +43,11 @@ Cliente.hasOne(ClaveDinamica, { foreignKey: 'cedula_cliente' });
 ClaveDinamica.belongsTo(Cliente, { foreignKey: 'cedula_cliente' });
 
 //Conectarse a la base de datos
-// sequalize
-// .sync({ force: true }) // force: true recreará las tablas en cada reinicio (¡ten cuidado en producción!)
-// .then(() => {
-//     console.log('Base de datos conectada');
-// })
-// .catch((error) => {
-//     console.error('Error al conectar la base de datos:', error);
-// });
+sequalize
+.sync({ force: true }) // force: true recreará las tablas en cada reinicio (¡ten cuidado en producción!)
+.then(() => {
+    console.log('Base de datos conectada');
+})
+.catch((error) => {
+    console.error('Error al conectar la base de datos:', error);
+});
